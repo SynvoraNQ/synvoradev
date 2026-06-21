@@ -403,7 +403,7 @@ export function BioPage() {
 
               {/* avatar + name */}
               <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-36 w-36">
+                <div className="relative h-28 w-28 sm:h-36 sm:w-36">
                   {/* outer pulsing halo */}
                   <div
                     className="absolute -inset-3 rounded-full animate-pulse-glow"
