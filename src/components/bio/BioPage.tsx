@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, VolumeX, Play, Pause, MapPin, Eye, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, Play, MapPin, Eye, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site.config";
 import { SocialIcon } from "./SocialIcon";
 
