@@ -143,16 +143,113 @@
   }
 }
 
+/* ───── Floating particles ───── */
 @keyframes float-up {
-  0% { transform: translateY(0) translateX(0); opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.9; }
+  50%  { transform: translateY(-50vh) translateX(15px); }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-110vh) translateX(-10px); opacity: 0; }
 }
 .animate-float { animation: float-up linear infinite; }
 
+/* ───── Card entrance ───── */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px) scale(0.97); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
-.animate-fade-in { animation: fade-in 0.6s ease-out both; }
+.animate-fade-in { animation: fade-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ───── Staggered children entrance ───── */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ───── Gradient sweep on borders/text ───── */
+@keyframes gradient-pan {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-pan 6s linear infinite;
+}
+
+/* ───── Avatar slow ring rotation ───── */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 12s linear infinite; }
+
+/* ───── Pulsing glow ───── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 30px var(--accent, #4361ee), 0 0 60px transparent; }
+  50%      { box-shadow: 0 0 50px var(--accent, #4361ee), 0 0 90px var(--accent, #4361ee); }
+}
+.animate-pulse-glow { animation: pulse-glow 3.5s ease-in-out infinite; }
+
+/* ───── Subtle floating on the card ───── */
+@keyframes hover-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.animate-hover-float { animation: hover-float 6s ease-in-out infinite; }
+
+/* ───── Scan line / shine sweep ───── */
+@keyframes shine {
+  0%   { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%)  skewX(-20deg); }
+}
+.shine-on-hover { position: relative; overflow: hidden; }
+.shine-on-hover::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transform: translateX(-120%) skewX(-20deg);
+  pointer-events: none;
+  transition: transform 0.1s;
+}
+.shine-on-hover:hover::before { animation: shine 0.9s ease forwards; }
+
+/* ───── Splash blink ───── */
+@keyframes splash-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.06); opacity: 0.85; }
+}
+.animate-splash-pulse { animation: splash-pulse 2.2s ease-in-out infinite; }
+
+/* ───── Caret blink for hint ───── */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+.animate-blink { animation: blink 1.4s step-end infinite; }
+
+/* ───── Equalizer bars (now playing) ───── */
+@keyframes eq-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(1); }
+}
+.eq-bar { transform-origin: bottom; animation: eq-bar 0.9s ease-in-out infinite; }
+
+/* ───── Conic aurora background spin ───── */
+@keyframes aurora {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-aurora { animation: aurora 22s linear infinite; }
+
+/* ───── Grid lines drift ───── */
+@keyframes grid-drift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
+}
+.animate-grid {
+  background-image:
+    linear-gradient(rgba(120,160,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,160,255,0.07) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: grid-drift 18s linear infinite;
+}
