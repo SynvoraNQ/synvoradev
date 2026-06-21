@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  *  ALL-IN-ONE BIO PAGE CONFIG
- *  Edit everything about your bio site here. No need to touch other files.
+ *  Edit everything here. Nothing else needs to change.
  * ============================================================================
  */
 
@@ -17,6 +17,7 @@ export type SocialIcon =
   | "telegram"
   | "email"
   | "globe"
+  | "steam"
   | "link";
 
 export interface SocialLink {
@@ -26,72 +27,61 @@ export interface SocialLink {
 }
 
 export interface SiteConfig {
-  // ---------- Page metadata (browser tab + sharing) ----------
-  meta: {
-    title: string;        // browser tab title
-    description: string;  // og description
-    favicon?: string;     // url or /path
-  };
+  meta: { title: string; description: string; favicon?: string };
 
-  // ---------- Splash / "click to enter" overlay ----------
-  splash: {
-    enabled: boolean;
-    text: string;        // big text on splash
-    subtext: string;     // small text below
-    buttonText: string;  // hint text
-  };
+  splash: { enabled: boolean; text: string; subtext: string; buttonText: string };
 
-  // ---------- Background ----------
   background: {
-    // either "video" or "image"
-    type: "video" | "image";
-    videoUrl?: string;   // mp4 url, used if type="video"
-    posterUrl?: string;  // fallback image while video loads
-    imageUrl?: string;   // used if type="image"
-    overlayOpacity: number; // 0..1 dark overlay strength
+    /** "video" = mp4, "image" = static, "youtube" = YouTube video as background */
+    type: "video" | "image" | "youtube";
+    videoUrl?: string;
+    posterUrl?: string;
+    imageUrl?: string;
+    /** YouTube video ID (the part after v=) — used when type="youtube" */
+    youtubeId?: string;
+    overlayOpacity: number;
   };
 
-  // ---------- Profile card ----------
   profile: {
-    avatarUrl: string;       // square image, will be circled
-    displayName: string;     // big name at top
-    username: string;        // shown as @username
-    bio: string;             // short bio / description
-    badges?: string[];       // optional small badge labels (e.g. "developer", "17 y/o")
-    location?: string;       // optional location text
+    avatarUrl: string;
+    displayName: string;
+    username: string;
+    bio: string;
+    badges?: string[];
+    location?: string;
   };
 
-  // ---------- Social / link buttons ----------
   socials: SocialLink[];
 
-  // ---------- Background music ----------
   music: {
     enabled: boolean;
-    src?: string;            // mp3/ogg url
-    title?: string;          // song title
-    artist?: string;         // artist name
-    coverUrl?: string;       // album art
+    /** "file" plays an mp3/ogg src; "youtube" plays the audio of a YouTube video */
+    source: "file" | "youtube";
+    src?: string;
+    /** YouTube video ID — used when source="youtube" */
+    youtubeId?: string;
+    title?: string;
+    artist?: string;
+    coverUrl?: string;
     autoplay: boolean;
-    initialVolume: number;   // 0..1
+    initialVolume: number;
     loop: boolean;
   };
 
-  // ---------- Theme (dark-blue defaults match the inspiration) ----------
   theme: {
-    accent: string;        // primary accent color (hex)
-    accent2: string;       // secondary accent color (hex)
-    cardBg: string;        // rgba/hex for the glass card
-    cardBorder: string;    // border for the glass card
+    accent: string;
+    accent2: string;
+    cardBg: string;
+    cardBorder: string;
     textPrimary: string;
     textMuted: string;
   };
 
-  // ---------- Effects ----------
   effects: {
-    tiltOnMouse: boolean;     // card tilts as you move the mouse
-    showViewCounter: boolean; // simple local view counter
-    typewriterBio: boolean;   // type the bio out
-    rainParticles: boolean;   // subtle floating particles
+    tiltOnMouse: boolean;
+    showViewCounter: boolean;
+    typewriterBio: boolean;
+    rainParticles: boolean;
   };
 }
 
@@ -101,55 +91,49 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   meta: {
-    title: "@yourname",
-    description: "my little corner of the internet",
+    title: "@synvora",
+    description: "Some names are meant to stay in the source code.",
     favicon: "/favicon.ico",
   },
 
   splash: {
     enabled: true,
     text: "click to enter",
-    subtext: "loud music at start, be aware",
+    subtext: "audio plays on entry",
     buttonText: "click anywhere",
   },
 
   background: {
-    type: "video",
-    videoUrl:
-      "https://cdn.pixabay.com/video/2023/10/26/186026-878853431_large.mp4",
+    type: "youtube",
+    youtubeId: "AMxlkS-VX-4",
     posterUrl:
       "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1920&q=80",
-    imageUrl:
-      "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1920&q=80",
-    overlayOpacity: 0.55,
+    overlayOpacity: 0.7,
   },
 
   profile: {
     avatarUrl:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop&q=80",
-    displayName: "your name",
-    username: "yourname",
-    bio: "just a person who loves the night sky.",
-    badges: ["developer", "designer"],
-    location: "somewhere on earth",
+      "https://cdn.discordapp.com/attachments/907961537677901854/1518195224877334659/IMG_6051.png?ex=6a3908fc&is=6a37b77c&hm=51ac12c7ff7bd2e3cef9c7da566594b9f987a4ad0810f872f4e9ab739085c76e",
+    displayName: "Synvora",
+    username: "synvora",
+    bio: "Some names are meant to stay in the source code.",
+    badges: ["developer", "trader"],
   },
 
   socials: [
     { icon: "discord", label: "discord", href: "https://discord.com/users/000" },
-    { icon: "twitter", label: "twitter", href: "https://twitter.com/yourname" },
-    { icon: "instagram", label: "instagram", href: "https://instagram.com/yourname" },
-    { icon: "github", label: "github", href: "https://github.com/yourname" },
-    { icon: "spotify", label: "spotify", href: "https://open.spotify.com/user/yourname" },
+    { icon: "steam", label: "steam", href: "https://steamcommunity.com/id/synvora" },
+    { icon: "github", label: "github", href: "https://github.com/synvora" },
     { icon: "email", label: "email", href: "mailto:hi@example.com" },
   ],
 
   music: {
     enabled: true,
-    src: "https://cdn.pixabay.com/audio/2023/10/30/audio_67c3a17e8d.mp3",
-    title: "midnight blue",
-    artist: "ambient",
-    coverUrl:
-      "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200&h=200&fit=crop&q=80",
+    source: "youtube",
+    youtubeId: "W-hwLlqwiKI",
+    title: "now playing",
+    artist: "from YouTube",
+    coverUrl: "https://i.ytimg.com/vi/W-hwLlqwiKI/hqdefault.jpg",
     autoplay: true,
     initialVolume: 0.5,
     loop: true,
@@ -158,7 +142,7 @@ export const siteConfig: SiteConfig = {
   theme: {
     accent: "#4361ee",
     accent2: "#3651d4",
-    cardBg: "rgba(10, 12, 22, 0.55)",
+    cardBg: "rgba(8, 10, 18, 0.65)",
     cardBorder: "rgba(67, 97, 238, 0.35)",
     textPrimary: "rgba(255,255,255,0.95)",
     textMuted: "rgba(255,255,255,0.55)",
