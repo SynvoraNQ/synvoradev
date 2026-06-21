@@ -9,6 +9,7 @@ import {
   Send,
   Mail,
   Globe,
+  Gamepad2,
   Link as LinkIcon,
 } from "lucide-react";
 import type { SocialIcon as SocialIconName } from "@/config/site.config";
@@ -27,6 +28,7 @@ export function SocialIcon({ name, className }: { name: SocialIconName; classNam
     case "telegram": return <Send {...props} />;
     case "email": return <Mail {...props} />;
     case "globe": return <Globe {...props} />;
+    case "steam": return <Gamepad2 {...props} />;
     default: return <LinkIcon {...props} />;
   }
 }

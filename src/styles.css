@@ -183,6 +183,19 @@
 }
 .animate-spin-slow { animation: spin-slow 12s linear infinite; }
 
+/* ───── Reverse spin ───── */
+@keyframes spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+.animate-spin-reverse { animation: spin-reverse 18s linear infinite; }
+
+/* ───── Orbiting dot around avatar ───── */
+@keyframes orbit {
+  from { transform: translate(-50%, -50%) rotate(0deg) translateX(80px) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg) translateX(80px) rotate(-360deg); }
+}
+.animate-orbit { animation: orbit 6s linear infinite; }
+
 /* ───── Pulsing glow ───── */
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 30px var(--accent, #4361ee), 0 0 60px transparent; }
