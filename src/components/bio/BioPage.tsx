@@ -364,7 +364,7 @@ export function BioPage() {
       {/* View counter */}
       {entered && cfg.effects.showViewCounter && (
         <div
-          className="absolute right-4 top-4 z-30 flex items-center gap-2 rounded-full border px-3 py-2 text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
+          className="absolute right-2 top-2 sm:right-4 sm:top-4 z-30 flex items-center gap-1.5 sm:gap-2 rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
           style={{
             background: cfg.theme.cardBg,
             borderColor: cfg.theme.cardBorder,
