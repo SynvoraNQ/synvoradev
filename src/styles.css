@@ -191,8 +191,8 @@
 
 /* ───── Orbiting dot around avatar ───── */
 @keyframes orbit {
-  from { transform: translate(-50%, -50%) rotate(0deg) translateX(80px) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg) translateX(80px) rotate(-360deg); }
+  from { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-r, 64px)) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-r, 64px)) rotate(-360deg); }
 }
 .animate-orbit { animation: orbit 6s linear infinite; }
 

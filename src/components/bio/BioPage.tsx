@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, VolumeX, Play, Pause, MapPin, Eye, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, Play, MapPin, Eye, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site.config";
 import { SocialIcon } from "./SocialIcon";
 
@@ -149,19 +149,6 @@ export function BioPage() {
     } catch { /* */ }
   }, [volume, muted]);
 
-  const togglePlay = async () => {
-    if (useFileMusic && audioRef.current) {
-      if (playing) { audioRef.current.pause(); setPlaying(false); }
-      else { try { await audioRef.current.play(); setPlaying(true); } catch { /* */ } }
-      return;
-    }
-    if (useYTMusic && ytPlayerRef.current) {
-      try {
-        if (playing) { ytPlayerRef.current.pauseVideo?.(); setPlaying(false); }
-        else { ytPlayerRef.current.playVideo?.(); setPlaying(true); }
-      } catch { /* */ }
-    }
-  };
 
   const particles = useMemo(
     () => Array.from({ length: 40 }, (_, i) => ({
@@ -347,7 +334,7 @@ export function BioPage() {
       {/* Volume control */}
       {entered && cfg.music.enabled && (
         <div
-          className="absolute left-4 top-4 z-30 flex items-center gap-2 rounded-full border px-3 py-2 backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
+          className="absolute left-2 top-2 sm:left-4 sm:top-4 z-30 flex items-center gap-2 rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
           style={{
             background: cfg.theme.cardBg,
             borderColor: cfg.theme.cardBorder,
@@ -366,7 +353,7 @@ export function BioPage() {
             type="range" min={0} max={1} step={0.01}
             value={muted ? 0 : volume}
             onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false); }}
-            className="h-1 w-24 cursor-pointer accent-white"
+            className="h-1 w-16 sm:w-24 cursor-pointer accent-white"
           />
           <span className="w-9 text-right text-[11px] tabular-nums" style={{ color: cfg.theme.textMuted }}>
             {Math.round((muted ? 0 : volume) * 100)}%
@@ -377,7 +364,7 @@ export function BioPage() {
       {/* View counter */}
       {entered && cfg.effects.showViewCounter && (
         <div
-          className="absolute right-4 top-4 z-30 flex items-center gap-2 rounded-full border px-3 py-2 text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
+          className="absolute right-2 top-2 sm:right-4 sm:top-4 z-30 flex items-center gap-1.5 sm:gap-2 rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 animate-rise"
           style={{
             background: cfg.theme.cardBg,
             borderColor: cfg.theme.cardBorder,
@@ -396,7 +383,7 @@ export function BioPage() {
           <div className="animate-hover-float" style={{ willChange: "transform" }}>
             <div
               ref={cardRef}
-              className="relative w-full max-w-md overflow-hidden rounded-3xl border p-8 backdrop-blur-2xl transition-transform duration-200 ease-out animate-fade-in"
+              className="relative w-full max-w-[92vw] sm:max-w-md overflow-hidden rounded-3xl border p-5 sm:p-8 backdrop-blur-2xl transition-transform duration-200 ease-out animate-fade-in"
               style={{
                 background: cfg.theme.cardBg,
                 borderColor: cfg.theme.cardBorder,
@@ -416,7 +403,7 @@ export function BioPage() {
 
               {/* avatar + name */}
               <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-36 w-36">
+                <div className="relative h-28 w-28 sm:h-36 sm:w-36">
                   {/* outer pulsing halo */}
                   <div
                     className="absolute -inset-3 rounded-full animate-pulse-glow"
@@ -483,7 +470,7 @@ export function BioPage() {
                 </div>
 
                 <h1
-                  className="mt-6 animate-rise bg-clip-text text-2xl font-semibold tracking-tight text-transparent animate-gradient"
+                  className="mt-5 sm:mt-6 animate-rise bg-clip-text text-xl sm:text-2xl font-semibold tracking-tight text-transparent animate-gradient"
                   style={{
                     backgroundImage: `linear-gradient(90deg, ${cfg.theme.textPrimary}, ${cfg.theme.accent}, ${cfg.theme.textPrimary})`,
                     animationDelay: "0.2s",
@@ -572,61 +559,6 @@ export function BioPage() {
                   </a>
                 ))}
               </div>
-
-              {/* now playing */}
-              {cfg.music.enabled && (useFileMusic || useYTMusic) && (
-                <div
-                  className="relative mt-6 flex animate-rise items-center gap-3 overflow-hidden rounded-2xl border p-3 transition-all duration-300 hover:scale-[1.02]"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    borderColor: cfg.theme.cardBorder,
-                    animationDelay: "0.95s",
-                    boxShadow: playing ? `0 0 30px ${cfg.theme.accent}33` : "none",
-                  }}
-                >
-                  {cfg.music.coverUrl && (
-                    <img
-                      src={cfg.music.coverUrl}
-                      alt=""
-                      className={`h-11 w-11 rounded-lg object-cover transition-transform duration-700 ${playing ? "animate-spin-slow" : ""}`}
-                      draggable={false}
-                    />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium" style={{ color: cfg.theme.textPrimary }}>
-                      {cfg.music.title ?? "now playing"}
-                    </p>
-                    <p className="truncate text-xs" style={{ color: cfg.theme.textMuted }}>
-                      {cfg.music.artist ?? ""}
-                    </p>
-                  </div>
-
-                  {playing && (
-                    <div className="flex h-6 items-end gap-0.5">
-                      {[0, 0.15, 0.3, 0.1].map((d, i) => (
-                        <span
-                          key={i}
-                          className="eq-bar w-0.5 rounded-sm"
-                          style={{ height: "100%", background: cfg.theme.accent, animationDelay: `${d}s` }}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  <button
-                    onClick={togglePlay}
-                    className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
-                    style={{
-                      background: cfg.theme.accent,
-                      color: "white",
-                      boxShadow: `0 0 20px ${cfg.theme.accent}88`,
-                    }}
-                    aria-label={playing ? "pause" : "play"}
-                  >
-                    {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 translate-x-0.5" />}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </main>
