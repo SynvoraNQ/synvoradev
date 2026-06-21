@@ -149,19 +149,6 @@ export function BioPage() {
     } catch { /* */ }
   }, [volume, muted]);
 
-  const togglePlay = async () => {
-    if (useFileMusic && audioRef.current) {
-      if (playing) { audioRef.current.pause(); setPlaying(false); }
-      else { try { await audioRef.current.play(); setPlaying(true); } catch { /* */ } }
-      return;
-    }
-    if (useYTMusic && ytPlayerRef.current) {
-      try {
-        if (playing) { ytPlayerRef.current.pauseVideo?.(); setPlaying(false); }
-        else { ytPlayerRef.current.playVideo?.(); setPlaying(true); }
-      } catch { /* */ }
-    }
-  };
 
   const particles = useMemo(
     () => Array.from({ length: 40 }, (_, i) => ({
