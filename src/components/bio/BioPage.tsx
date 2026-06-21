@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, VolumeX, Play, MapPin, Eye, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, Play, Pause, MapPin, Eye, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site.config";
 import { SocialIcon } from "./SocialIcon";
 
@@ -148,6 +148,20 @@ export function BioPage() {
       }
     } catch { /* */ }
   }, [volume, muted]);
+
+  const togglePlay = async () => {
+    if (useFileMusic && audioRef.current) {
+      if (playing) { audioRef.current.pause(); setPlaying(false); }
+      else { try { await audioRef.current.play(); setPlaying(true); } catch { /* */ } }
+      return;
+    }
+    if (useYTMusic && ytPlayerRef.current) {
+      try {
+        if (playing) { ytPlayerRef.current.pauseVideo?.(); setPlaying(false); }
+        else { ytPlayerRef.current.playVideo?.(); setPlaying(true); }
+      } catch { /* */ }
+    }
+  };
 
 
   const particles = useMemo(
@@ -559,6 +573,64 @@ export function BioPage() {
                   </a>
                 ))}
               </div>
+
+              {/* now playing / music block */}
+              {cfg.music.enabled && (useFileMusic || useYTMusic) && (
+                <div
+                  className="relative mt-6 flex animate-rise items-center gap-3 overflow-hidden rounded-2xl border p-3 transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    borderColor: cfg.theme.cardBorder,
+                    animationDelay: "0.85s",
+                    boxShadow: playing ? `0 0 30px ${cfg.theme.accent}33` : "none",
+                  }}
+                >
+                  {cfg.music.coverUrl && (
+                    <img
+                      src={cfg.music.coverUrl}
+                      alt=""
+                      className={`h-11 w-11 rounded-lg object-cover transition-transform duration-700 ${playing ? "animate-spin-slow" : ""}`}
+                      draggable={false}
+                    />
+                  )}
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="truncate text-[10px] uppercase tracking-wider font-semibold opacity-60" style={{ color: cfg.theme.textMuted }}>
+                      Now Playing
+                    </p>
+                    <p className="truncate text-sm font-medium" style={{ color: cfg.theme.textPrimary }}>
+                      {cfg.music.title}
+                    </p>
+                    <p className="truncate text-xs" style={{ color: cfg.theme.textMuted }}>
+                      {cfg.music.artist ?? ""}
+                    </p>
+                  </div>
+
+                  {playing && (
+                    <div className="flex h-6 items-end gap-0.5">
+                      {[0, 0.15, 0.3, 0.1].map((d, i) => (
+                        <span
+                          key={i}
+                          className="eq-bar w-0.5 rounded-sm"
+                          style={{ height: "100%", background: cfg.theme.accent, animationDelay: `${d}s` }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={togglePlay}
+                    className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 shrink-0"
+                    style={{
+                      background: cfg.theme.accent,
+                      color: "white",
+                      boxShadow: `0 0 20px ${cfg.theme.accent}88`,
+                    }}
+                    aria-label={playing ? "pause" : "play"}
+                  >
+                    {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 translate-x-0.5" />}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </main>
