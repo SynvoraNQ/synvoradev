@@ -470,7 +470,7 @@ export function BioPage() {
                 </div>
 
                 <h1
-                  className="mt-6 animate-rise bg-clip-text text-2xl font-semibold tracking-tight text-transparent animate-gradient"
+                  className="mt-5 sm:mt-6 animate-rise bg-clip-text text-xl sm:text-2xl font-semibold tracking-tight text-transparent animate-gradient"
                   style={{
                     backgroundImage: `linear-gradient(90deg, ${cfg.theme.textPrimary}, ${cfg.theme.accent}, ${cfg.theme.textPrimary})`,
                     animationDelay: "0.2s",
