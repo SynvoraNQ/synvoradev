@@ -353,7 +353,7 @@ export function BioPage() {
             type="range" min={0} max={1} step={0.01}
             value={muted ? 0 : volume}
             onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false); }}
-            className="h-1 w-24 cursor-pointer accent-white"
+            className="h-1 w-16 sm:w-24 cursor-pointer accent-white"
           />
           <span className="w-9 text-right text-[11px] tabular-nums" style={{ color: cfg.theme.textMuted }}>
             {Math.round((muted ? 0 : volume) * 100)}%
