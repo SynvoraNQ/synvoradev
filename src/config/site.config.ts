@@ -1,10 +1,3 @@
-/**
- * ============================================================================
- *  ALL-IN-ONE BIO PAGE CONFIG
- *  Edit everything here. Nothing else needs to change.
- * ============================================================================
- */
-
 export type SocialIcon =
   | "discord"
   | "twitter"
@@ -99,8 +92,8 @@ export const siteConfig: SiteConfig = {
   splash: {
     enabled: true,
     text: "click to enter",
-    subtext: "audio plays on entry",
-    buttonText: "click anywhere",
+    subtext: "welcome to... synvora.",
+    buttonText: "click anywhere.",
   },
 
   background: {
@@ -121,10 +114,10 @@ export const siteConfig: SiteConfig = {
   },
 
   socials: [
-    { icon: "discord", label: "discord", href: "https://discord.com/users/000" },
-    { icon: "steam", label: "steam", href: "https://steamcommunity.com/id/synvora" },
-    { icon: "github", label: "github", href: "https://github.com/synvora" },
-    { icon: "email", label: "email", href: "mailto:hi@example.com" },
+    { icon: "discord", label: "discord", href: "https://discord.com/users/1518187847549583510" },
+    { icon: "steam", label: "steam", href: "https://steamcommunity.com/id/SakANagaDic/" },
+    { icon: "github", label: "github", href: "https://github.com/synvoraNQ" },
+    { icon: "email", label: "email", href: "synvora.dev@gmail.com" },
   ],
 
   music: {
