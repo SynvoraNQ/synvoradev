@@ -383,7 +383,7 @@ export function BioPage() {
           <div className="animate-hover-float" style={{ willChange: "transform" }}>
             <div
               ref={cardRef}
-              className="relative w-full max-w-md overflow-hidden rounded-3xl border p-8 backdrop-blur-2xl transition-transform duration-200 ease-out animate-fade-in"
+              className="relative w-full max-w-[92vw] sm:max-w-md overflow-hidden rounded-3xl border p-5 sm:p-8 backdrop-blur-2xl transition-transform duration-200 ease-out animate-fade-in"
               style={{
                 background: cfg.theme.cardBg,
                 borderColor: cfg.theme.cardBorder,
