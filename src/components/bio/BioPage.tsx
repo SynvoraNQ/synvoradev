@@ -3,6 +3,32 @@ import { Volume2, VolumeX, Play, Pause, MapPin, Eye, Sparkles } from "lucide-rea
 import { siteConfig } from "@/config/site.config";
 import { SocialIcon } from "./SocialIcon";
 
+// ---- minimal YT IFrame API typing ----
+declare global {
+  interface Window {
+    YT?: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+let ytApiPromise: Promise<void> | null = null;
+function loadYouTubeApi(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (ytApiPromise) return ytApiPromise;
+  ytApiPromise = new Promise<void>((resolve) => {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      prev?.();
+      resolve();
+    };
+  });
+  return ytApiPromise;
+}
+
 export function BioPage() {
   const cfg = siteConfig;
   const [entered, setEntered] = useState(!cfg.splash.enabled);
@@ -11,10 +37,16 @@ export function BioPage() {
   const [volume, setVolume] = useState(cfg.music.initialVolume);
   const [views, setViews] = useState(0);
   const [mouse, setMouse] = useState({ x: 50, y: 50 });
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const ytHostRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
+  const useYTMusic = cfg.music.enabled && cfg.music.source === "youtube" && !!cfg.music.youtubeId;
+  const useFileMusic = cfg.music.enabled && cfg.music.source === "file" && !!cfg.music.src;
+
+  // view counter
   useEffect(() => {
     if (!cfg.effects.showViewCounter) return;
     try {
@@ -25,12 +57,61 @@ export function BioPage() {
     } catch { /* ignore */ }
   }, [cfg.effects.showViewCounter]);
 
+  // init YT music player
+  useEffect(() => {
+    if (!useYTMusic || !ytHostRef.current) return;
+    let cancelled = false;
+    loadYouTubeApi().then(() => {
+      if (cancelled || !ytHostRef.current) return;
+      ytPlayerRef.current = new window.YT.Player(ytHostRef.current, {
+        videoId: cfg.music.youtubeId,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          modestbranding: 1,
+          playsinline: 1,
+          loop: cfg.music.loop ? 1 : 0,
+          playlist: cfg.music.loop ? cfg.music.youtubeId : undefined,
+        },
+        events: {
+          onReady: (e: any) => {
+            try {
+              e.target.setVolume(Math.round(volume * 100));
+            } catch { /* */ }
+          },
+          onStateChange: (e: any) => {
+            if (!window.YT) return;
+            if (e.data === window.YT.PlayerState.PLAYING) setPlaying(true);
+            else if (
+              e.data === window.YT.PlayerState.PAUSED ||
+              e.data === window.YT.PlayerState.ENDED
+            ) setPlaying(false);
+          },
+        },
+      });
+    });
+    return () => {
+      cancelled = true;
+      try { ytPlayerRef.current?.destroy?.(); } catch { /* */ }
+      ytPlayerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useYTMusic]);
+
   const handleEnter = async () => {
     setEntered(true);
-    if (videoRef.current) { try { await videoRef.current.play(); } catch { /* */ } }
-    if (cfg.music.enabled && audioRef.current && cfg.music.autoplay) {
+    if (useFileMusic && audioRef.current && cfg.music.autoplay) {
       audioRef.current.volume = volume;
       try { await audioRef.current.play(); setPlaying(true); } catch { /* */ }
+    }
+    if (useYTMusic && ytPlayerRef.current && cfg.music.autoplay) {
+      try {
+        ytPlayerRef.current.unMute?.();
+        ytPlayerRef.current.setVolume?.(Math.round(volume * 100));
+        ytPlayerRef.current.playVideo?.();
+        setPlaying(true);
+      } catch { /* */ }
     }
   };
 
@@ -56,15 +137,30 @@ export function BioPage() {
     };
   }, [entered, cfg.effects.tiltOnMouse]);
 
+  // sync volume / mute
   useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = muted ? 0 : volume;
+    const v = muted ? 0 : volume;
+    if (audioRef.current) audioRef.current.volume = v;
+    try {
+      if (ytPlayerRef.current) {
+        ytPlayerRef.current.setVolume?.(Math.round(v * 100));
+        if (muted) ytPlayerRef.current.mute?.(); else ytPlayerRef.current.unMute?.();
+      }
+    } catch { /* */ }
   }, [volume, muted]);
 
   const togglePlay = async () => {
-    if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlaying(false); }
-    else { try { await audioRef.current.play(); setPlaying(true); } catch { /* */ } }
+    if (useFileMusic && audioRef.current) {
+      if (playing) { audioRef.current.pause(); setPlaying(false); }
+      else { try { await audioRef.current.play(); setPlaying(true); } catch { /* */ } }
+      return;
+    }
+    if (useYTMusic && ytPlayerRef.current) {
+      try {
+        if (playing) { ytPlayerRef.current.pauseVideo?.(); setPlaying(false); }
+        else { ytPlayerRef.current.playVideo?.(); setPlaying(true); }
+      } catch { /* */ }
+    }
   };
 
   const particles = useMemo(
@@ -78,6 +174,10 @@ export function BioPage() {
     [],
   );
 
+  const ytBgSrc = cfg.background.type === "youtube" && cfg.background.youtubeId
+    ? `https://www.youtube.com/embed/${cfg.background.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${cfg.background.youtubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1`
+    : null;
+
   return (
     <div
       className="relative h-screen w-screen overflow-hidden select-none"
@@ -90,10 +190,24 @@ export function BioPage() {
         ["--muted" as never]: cfg.theme.textMuted,
       }}
     >
-      {/* Background video / image */}
-      {cfg.background.type === "video" && cfg.background.videoUrl ? (
+      {/* Background: YouTube / video / image */}
+      {ytBgSrc ? (
+        <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+          {/* Scaled iframe to hide black bars + controls */}
+          <iframe
+            src={ytBgSrc}
+            title="background"
+            allow="autoplay; encrypted-media"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{
+              width: "max(177.78vh, 100vw)",
+              height: "max(56.25vw, 100vh)",
+              border: 0,
+            }}
+          />
+        </div>
+      ) : cfg.background.type === "video" && cfg.background.videoUrl ? (
         <video
-          ref={videoRef}
           autoPlay muted loop playsInline preload="metadata"
           poster={cfg.background.posterUrl}
           className="absolute inset-0 h-full w-full object-cover scale-105"
@@ -104,7 +218,7 @@ export function BioPage() {
       ) : (
         <div
           className="absolute inset-0 bg-cover bg-center scale-105"
-          style={{ backgroundImage: `url(${cfg.background.imageUrl})`, zIndex: 0 }}
+          style={{ backgroundImage: `url(${cfg.background.imageUrl ?? cfg.background.posterUrl})`, zIndex: 0 }}
         />
       )}
 
@@ -126,11 +240,19 @@ export function BioPage() {
         <div className="pointer-events-none absolute inset-0 animate-grid" style={{ zIndex: 1, opacity: 0.5 }} />
       )}
 
-      {/* Dark overlay tint */}
+      {/* Dark overlay tint (heavier per request) */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: `linear-gradient(135deg, ${cfg.theme.accent}1f 0%, rgba(0,0,0,${cfg.background.overlayOpacity}) 50%, #00000044 100%)`,
+          background: `linear-gradient(135deg, ${cfg.theme.accent}1f 0%, rgba(0,0,0,${cfg.background.overlayOpacity}) 50%, rgba(0,0,0,0.55) 100%)`,
+          zIndex: 2,
+        }}
+      />
+      {/* Extra vignette for darkness */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.55) 100%)",
           zIndex: 2,
         }}
       />
@@ -167,9 +289,27 @@ export function BioPage() {
         </div>
       )}
 
-      {/* Audio */}
-      {cfg.music.enabled && cfg.music.src && (
+      {/* File audio (only used when source="file") */}
+      {useFileMusic && (
         <audio ref={audioRef} src={cfg.music.src} loop={cfg.music.loop} preload="auto" />
+      )}
+
+      {/* Hidden YouTube music host */}
+      {useYTMusic && (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            opacity: 0,
+            pointerEvents: "none",
+            left: -9999,
+            top: -9999,
+          }}
+        >
+          <div ref={ytHostRef} />
+        </div>
       )}
 
       {/* Splash */}
@@ -260,10 +400,10 @@ export function BioPage() {
               style={{
                 background: cfg.theme.cardBg,
                 borderColor: cfg.theme.cardBorder,
-                boxShadow: `0 30px 80px rgba(0,0,0,0.55), 0 0 80px ${cfg.theme.accent}22, inset 0 0 0 1px ${cfg.theme.accent}11`,
+                boxShadow: `0 30px 80px rgba(0,0,0,0.6), 0 0 80px ${cfg.theme.accent}22, inset 0 0 0 1px ${cfg.theme.accent}11`,
               }}
             >
-              {/* animated gradient border ribbon */}
+              {/* animated gradient ribbon */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 rounded-3xl animate-gradient"
@@ -276,22 +416,44 @@ export function BioPage() {
 
               {/* avatar + name */}
               <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-32 w-32">
-                  {/* rotating ring */}
+                <div className="relative h-36 w-36">
+                  {/* outer pulsing halo */}
                   <div
-                    className="absolute inset-0 rounded-full animate-spin-slow"
+                    className="absolute -inset-3 rounded-full animate-pulse-glow"
                     style={{
-                      background: `conic-gradient(from 0deg, ${cfg.theme.accent}, ${cfg.theme.accent2}, transparent, ${cfg.theme.accent})`,
+                      background: `radial-gradient(circle, ${cfg.theme.accent}55 0%, transparent 70%)`,
+                      filter: "blur(14px)",
+                    }}
+                  />
+                  {/* rotating conic ring */}
+                  <div
+                    className="absolute -inset-1 rounded-full animate-spin-slow"
+                    style={{
+                      background: `conic-gradient(from 0deg, ${cfg.theme.accent}, ${cfg.theme.accent2}, transparent, ${cfg.theme.accent2}, ${cfg.theme.accent})`,
                       filter: "blur(2px)",
                     }}
                   />
+                  {/* counter-rotating dotted ring */}
                   <div
-                    className="absolute inset-1 rounded-full animate-pulse-glow"
+                    className="absolute -inset-2 rounded-full animate-spin-reverse"
+                    style={{
+                      border: `1px dashed ${cfg.theme.accent}88`,
+                      maskImage: "radial-gradient(circle, transparent 60%, black 62%)",
+                      WebkitMaskImage: "radial-gradient(circle, transparent 60%, black 62%)",
+                    }}
+                  />
+                  {/* dark backdrop */}
+                  <div
+                    className="absolute inset-0 rounded-full"
                     style={{ background: "#05060d" }}
                   />
+                  {/* photo */}
                   <div
-                    className="absolute inset-2 overflow-hidden rounded-full border-2 transition-transform duration-500 hover:scale-105"
-                    style={{ borderColor: cfg.theme.accent }}
+                    className="absolute inset-1 overflow-hidden rounded-full border-2 transition-transform duration-500 hover:scale-105"
+                    style={{
+                      borderColor: cfg.theme.accent,
+                      boxShadow: `0 0 30px ${cfg.theme.accent}99, inset 0 0 20px ${cfg.theme.accent}33`,
+                    }}
                   >
                     <img
                       src={cfg.profile.avatarUrl}
@@ -299,11 +461,29 @@ export function BioPage() {
                       className="h-full w-full object-cover transition-transform duration-700 hover:scale-110"
                       draggable={false}
                     />
+                    {/* shine sweep */}
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 animate-shine"
+                      style={{
+                        background: "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)",
+                      }}
+                    />
                   </div>
+                  {/* orbiting dot */}
+                  <span
+                    aria-hidden
+                    className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 animate-orbit"
+                    style={{
+                      background: cfg.theme.accent,
+                      borderRadius: 9999,
+                      boxShadow: `0 0 12px ${cfg.theme.accent}, 0 0 24px ${cfg.theme.accent}88`,
+                    }}
+                  />
                 </div>
 
                 <h1
-                  className="mt-5 animate-rise bg-clip-text text-2xl font-semibold tracking-tight text-transparent animate-gradient"
+                  className="mt-6 animate-rise bg-clip-text text-2xl font-semibold tracking-tight text-transparent animate-gradient"
                   style={{
                     backgroundImage: `linear-gradient(90deg, ${cfg.theme.textPrimary}, ${cfg.theme.accent}, ${cfg.theme.textPrimary})`,
                     animationDelay: "0.2s",
@@ -358,7 +538,10 @@ export function BioPage() {
               </div>
 
               {/* socials */}
-              <div className="relative mt-6 grid grid-cols-3 gap-2">
+              <div
+                className="relative mt-6 grid gap-2"
+                style={{ gridTemplateColumns: `repeat(${Math.min(cfg.socials.length, 4)}, minmax(0, 1fr))` }}
+              >
                 {cfg.socials.map((s, i) => (
                   <a
                     key={i}
@@ -391,7 +574,7 @@ export function BioPage() {
               </div>
 
               {/* now playing */}
-              {cfg.music.enabled && cfg.music.src && (
+              {cfg.music.enabled && (useFileMusic || useYTMusic) && (
                 <div
                   className="relative mt-6 flex animate-rise items-center gap-3 overflow-hidden rounded-2xl border p-3 transition-all duration-300 hover:scale-[1.02]"
                   style={{
@@ -418,7 +601,6 @@ export function BioPage() {
                     </p>
                   </div>
 
-                  {/* equalizer */}
                   {playing && (
                     <div className="flex h-6 items-end gap-0.5">
                       {[0, 0.15, 0.3, 0.1].map((d, i) => (
