@@ -106,7 +106,7 @@ export const siteConfig: SiteConfig = {
 
   profile: {
     avatarUrl:
-      "https://cdn.discordapp.com/attachments/907961537677901854/1518195224877334659/IMG_6051.png?ex=6a3908fc&is=6a37b77c&hm=51ac12c7ff7bd2e3cef9c7da566594b9f987a4ad0810f872f4e9ab739085c76e",
+      "https://iili.io/CuZkCFI.png",
     displayName: "Synvora",
     username: "synvora.dev",
     bio: "Some names are meant to stay in the source code.",
